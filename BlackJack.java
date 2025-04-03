@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -31,6 +33,10 @@ public class BlackJack {
         public boolean isAce() {
             return value == "A";
         }
+
+        public String getImagePath() {
+            return "./cards/" + toString() + ".png";
+        }
     }
 
     ArrayList<Card> deck;
@@ -51,8 +57,40 @@ public class BlackJack {
     int boardWidth = 600;
     int boardHeight = boardWidth;
 
+    int cardWidth = 110;    //ratio should be 1/1.4
+    int cardHeight = 154;
+
     JFrame frame = new JFrame("Black Jack");
-    JPanel gamePanel = new JPanel();
+    JPanel gamePanel = new JPanel() {
+        @Override
+        public void paintComponent(Graphics g){
+            super.paintComponent(g);
+
+            try {
+
+                //draw hidden card
+                Image hiddenCardImg = new ImageIcon(getClass().getResource("./cards/BACK.png")).getImage();
+                g.drawImage(hiddenCardImg, 20, 20, cardWidth, cardHeight, null);
+
+                //draw dealers hand
+                for (int i = 0; i < dealerHand.size(); i++) {
+                    Card card = dealerHand.get(i);
+                    Image cardImg = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
+                    g.drawImage(cardImg, cardWidth + 25 + (cardWidth + 5)*i, 20, cardWidth, cardHeight, null);
+                }
+
+                //draw playe's hand
+                for (int i = 0; i < playerHand.size(); i++){
+                    Card card = playerHand.get(i);
+                    Image cardImg = new ImageIcon(getClass().getResource(card.getImagePath())).getImage();
+                    g.drawImage(cardImg,  20 + (cardWidth + 5)*i, 320, cardWidth, cardHeight, null);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
     JPanel buttonPanel = new JPanel();
     JButton hitButton = new JButton("Hit");
     JButton stayButton = new JButton("Stay");
@@ -75,6 +113,19 @@ public class BlackJack {
         stayButton.setFocusable(false);
         buttonPanel.add(stayButton);
         frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        hitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Card card = deck.remove(deck.size()-1);
+                playerSum += card.getValue();
+                playerAceCount += card.isAce() ? 1 : 0;
+                playerHand.add(card);
+                gamePanel.repaint();
+            }
+        });
+
+        gamePanel.repaint();
     }
 
     public void startGame() {
