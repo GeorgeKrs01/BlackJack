@@ -121,6 +121,26 @@ public class BlackJack {
                 playerSum += card.getValue();
                 playerAceCount += card.isAce() ? 1 : 0;
                 playerHand.add(card);
+                if (reducePlayerAce() > 21){
+                    hitButton.setEnabled(false);
+                }
+
+                gamePanel.repaint();
+            }
+        });
+
+        stayButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                hitButton.setEnabled(false);
+                stayButton.setEnabled(false);
+
+                while (dealerSum < 17) {
+                    Card card = deck.remove(deck.size()-1);
+                    dealerSum += card.getValue();
+                    dealerAceCount += card.isAce() ? 1 : 0;
+                    dealerHand.add(card);
+                }
                 gamePanel.repaint();
             }
         });
@@ -198,5 +218,21 @@ public class BlackJack {
 
         System.out.println("After Shuffle");
         System.out.println(deck);
+    }
+
+    public int reducePlayerAce() {
+        while (playerSum > 21 && playerAceCount > 0) {
+            playerSum -= 10;
+            playerAceCount -= 1;
+        }
+        return playerSum;
+    }
+
+    public int reduceDealerAce(){
+        while (dealerSum > 21 && dealerAceCount > 0) {
+            dealerSum -= 10;
+            dealerAceCount -= 1;
+        }
+        return dealerSum;
     }
 }
